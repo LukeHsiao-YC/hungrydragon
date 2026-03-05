@@ -4,26 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>大風吹，吹什麼? 小騎士與餓龍</title>
-  <!-- 引入 Tailwind CSS CDN，讓純 HTML 也能直接使用漂亮的排版 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* 這裡放一些 Tailwind CDN 無法直接處理的自訂小動畫 */
+    /* 原本的小動畫保留 */
     .animate-bounce-slow { animation: bounce 2s infinite; }
     .animate-pulse-fast { animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     @keyframes ping-slow {
       75%, 100% { transform: scale(1.5); opacity: 0; }
     }
     .animate-ping-custom { animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+    /* 這次新增的旋風魔法動畫 */
+    @keyframes spin-grow-fade {
+      0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+      20% { opacity: 1; }
+      80% { transform: scale(1.2) rotate(360deg); opacity: 1; }
+      100% { transform: scale(1.5) rotate(450deg); opacity: 0; }
+    }
+    .magic-tornado {
+      animation: spin-grow-fade 2.5s ease-in-out forwards;
+      pointer-events: none; /* 讓旋風不會擋住底下的滑鼠點擊 */
+    }
   </style>
 </head>
 <body id="main-body" class="min-h-screen flex items-center justify-center p-4 transition-colors duration-1000 font-sans bg-amber-100">
   
-  <!-- 這是整個故事書的外框，內容會由下面的 JavaScript 自動替換 -->
   <div class="max-w-3xl w-full bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/20" id="app">
   </div>
 
   <script>
-    // 故事的所有場景與狀態都放在這個陣列裡
     const scenes = [
       {
         id: 0,
@@ -156,40 +165,41 @@
       }
     ];
 
-    // 狀態變數管理
     let currentScene = 0;
     let magicCasted = false;
     let isAnimating = false;
 
-    // 核心渲染函數：每次狀態改變時，重新繪製畫面
     function render() {
       const scene = scenes[currentScene];
       const body = document.getElementById('main-body');
       const app = document.getElementById('app');
 
-      // 更新背景顏色
       body.className = `min-h-screen flex items-center justify-center p-4 transition-colors duration-1000 font-sans ${scene.bgColor}`;
 
-      // 1. 組合標題區 HTML (已依照需求將最上方的標題與副標題文字移除)
       let headerHtml = ``;
 
-      // 2. 組合視覺圖片區 HTML
       let visualHtml = `<div class="relative w-full h-64 md:h-96 bg-black/20 flex items-center justify-center overflow-hidden" id="visual-area">`;
       
-      // 判斷魔法是否已經施放，來決定要顯示哪一張圖片
       let currentImage = (magicCasted && scene.resultImageName) ? scene.resultImageName : scene.imageName;
       
-      // 圖片標籤，如果找不到圖片會觸發 onerror 執行 handleImageError() 替換成 Emoji
-      visualHtml += `<img id="scene-img" src="./${currentImage}" alt="${scene.title}" class="w-full h-full object-contain p-4 transition-opacity duration-500 ${isAnimating ? 'opacity-20' : 'opacity-100'}" onerror="handleImageError()">`;
+      // 底層主圖片
+      visualHtml += `<img id="scene-img" src="./${currentImage}" alt="${scene.title}" class="w-full h-full object-contain p-4 transition-opacity duration-1000 ${isAnimating ? 'opacity-50' : 'opacity-100'}" onerror="handleImageError()">`;
 
-      // 如果正在施放魔法動畫，加上漂浮的食物 Emoji
+      // 如果正在動畫中，蓋上旋風魔法圖層
       if (isAnimating && scene.interactive) {
+        visualHtml += `
+          <div class="absolute inset-0 flex items-center justify-center z-10">
+            <img src="./magic_wind.png" class="w-full h-full object-contain magic-tornado" onerror="this.style.display='none'">
+          </div>
+        `;
+        
+        // 保留原本飄出的食物 Emoji 當點綴
         let itemsHtml = scene.magicItems.map((item, index) =>
           `<span class="drop-shadow-2xl animate-pulse-fast" style="animation-delay: ${index * 0.2}s">${item}</span>`
         ).join('');
         
         visualHtml += `
-          <div class="absolute inset-0 flex items-center justify-center z-10">
+          <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
             <div class="flex gap-4 text-6xl md:text-8xl animate-bounce">
               ${itemsHtml}
             </div>
@@ -198,15 +208,12 @@
       }
       visualHtml += `</div>`;
 
-      // 3. 組合文字與互動按鈕區 HTML
       let contentHtml = `<div class="p-6 md:p-10">`;
       let textClass = `text-xl md:text-2xl leading-relaxed mb-8 ${scene.textColor} ${scene.isCover ? 'text-center font-medium' : ''}`;
-      // 如果魔法已經施放完畢，顯示結果文字，否則顯示原故事文字
       let textContent = magicCasted ? scene.resultContent : scene.content;
       contentHtml += `<p class="${textClass}">${textContent}</p>`;
 
       if (scene.isCover) {
-        // 封面專屬按鈕
         contentHtml += `
           <div class="flex justify-center mt-4">
             <button onclick="handleNext()" class="px-8 py-4 bg-amber-500 text-white rounded-full font-bold text-2xl shadow-lg hover:bg-amber-400 transition-all transform hover:scale-105 animate-bounce">
@@ -215,7 +222,6 @@
           </div>
         `;
       } else {
-        // 互動場景的魔法按鈕
         if (scene.interactive && !magicCasted) {
           contentHtml += `
             <div class="flex justify-center mb-8">
@@ -228,7 +234,6 @@
           `;
         }
 
-        // 下方的翻頁導航列
         contentHtml += `
           <div class="flex justify-between items-center mt-8 border-t border-white/20 pt-6">
             <button onclick="handlePrev()" class="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full font-medium transition-colors">
@@ -239,7 +244,6 @@
             </div>
         `;
 
-        // 如果不是互動場景，或是魔法已經施放完，就顯示下一頁
         if ((!scene.interactive || magicCasted) && !scene.isEnd) {
           contentHtml += `
             <button onclick="handleNext()" class="px-6 py-2 bg-white text-slate-900 rounded-full font-bold shadow-lg hover:bg-slate-100 transition-all transform hover:translate-x-1">
@@ -248,7 +252,6 @@
           `;
         }
 
-        // 結局頁面顯示回到封面
         if (scene.isEnd) {
           contentHtml += `
             <button onclick="handleRestart()" class="px-6 py-2 bg-green-500 text-white rounded-full font-bold shadow-lg hover:bg-green-400 transition-all">
@@ -261,11 +264,9 @@
       }
       contentHtml += `</div>`;
 
-      // 將組合好的 HTML 寫入網頁
       app.innerHTML = headerHtml + visualHtml + contentHtml;
     }
 
-    // 圖片找不到時的替代方案（顯示 Emoji）
     function handleImageError() {
       const scene = scenes[currentScene];
       const visualArea = document.getElementById('visual-area');
@@ -277,7 +278,7 @@
           `<span class="drop-shadow-2xl animate-pulse-fast" style="animation-delay: ${index * 0.2}s">${item}</span>`
         ).join('');
         fallbackHtml += `
-          <div class="absolute inset-0 flex items-center justify-center z-10">
+          <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
             <div class="flex gap-4 text-6xl md:text-8xl animate-bounce">
               ${itemsHtml}
             </div>
@@ -288,7 +289,6 @@
       visualArea.innerHTML = fallbackHtml;
     }
 
-    // 翻到下一頁
     function handleNext() {
       if (currentScene < scenes.length - 1) {
         currentScene++;
@@ -298,7 +298,6 @@
       }
     }
 
-    // 回到上一頁
     function handlePrev() {
       if (currentScene > 0) {
         currentScene--;
@@ -308,7 +307,6 @@
       }
     }
 
-    // 回到故事開頭
     function handleRestart() {
       currentScene = 0;
       magicCasted = false;
@@ -316,20 +314,18 @@
       render();
     }
 
-    // 觸發大風吹魔法
     function castMagic() {
       isAnimating = true;
       render(); 
 
-      // 模擬魔法動畫時間為 2 秒
+      // 這次的動畫我拉長到 2.5 秒，讓旋風轉得更有感覺
       setTimeout(() => {
         isAnimating = false;
         magicCasted = true;
         render(); 
-      }, 2000);
+      }, 2500);
     }
 
-    // 網頁載入時，畫出第一個畫面
     render();
   </script>
 </body>
