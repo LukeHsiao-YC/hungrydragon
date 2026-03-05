@@ -165,6 +165,19 @@ export default function App() {
     }, 2000);
   };
 
+  // 安全取得圖片路徑的小工具，避免 GitHub Pages 路徑解析錯誤
+  const getImageUrl = (imageName) => {
+    try {
+      if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) {
+        const base = import.meta.env.BASE_URL;
+        return base.endsWith('/') ? base + imageName : base + '/' + imageName;
+      }
+    } catch (e) {
+      console.warn("Path resolving skipped", e);
+    }
+    return './' + imageName;
+  };
+
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-1000 ${scene.bgColor} font-sans`}>
       <div className="max-w-3xl w-full bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/20">
@@ -184,10 +197,10 @@ export default function App() {
         {/* 視覺呈現區 (圖片或魔法動畫) */}
         <div className="relative w-full h-64 md:h-96 bg-black/20 flex items-center justify-center overflow-hidden">
           
-          {/* 如果有實際圖片，請將圖片放在專案的 public 資料夾中 */}
+          {/* 使用新的 getImageUrl 來處理圖片路徑 */}
           {!imageError ? (
             <img 
-              src={`./${scene.imageName}`} 
+              src={getImageUrl(scene.imageName)} 
               alt={scene.title}
               className={`w-full h-full object-contain p-4 transition-opacity duration-500 ${isAnimating ? 'opacity-20' : 'opacity-100'}`}
               onError={() => setImageError(true)}
