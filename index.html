@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大風吹，吹什麼？騎士廚師與餓肚子的龍</title>
+  <title>大風吹，吹什麼? 小騎士與餓龍</title>
   <!-- 引入 Tailwind CSS CDN，讓純 HTML 也能直接使用漂亮的排版 -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -27,9 +27,9 @@
     const scenes = [
       {
         id: 0,
-        title: "大風吹，吹什麼？",
-        subtitle: "騎士廚師與餓肚子的龍",
-        content: "一個關於勇氣、理解與均衡飲食的療癒故事。準備好跟著小騎士一起出發了嗎？",
+        title: "大風吹，吹什麼? 小騎士與餓龍",
+        subtitle: "究竟小騎士面對的是惡龍還是餓龍?",
+        content: "<span class='font-bold text-2xl md:text-3xl block mb-4'>大風吹，吹什麼? 小騎士與餓龍</span>究竟小騎士面對的是惡龍還是餓龍? 準備好一起出發了嗎?",
         imageName: "cover.png",
         emojiFallback: "📖🐉🍳",
         bgColor: "bg-amber-100",
@@ -170,12 +170,8 @@
       // 更新背景顏色
       body.className = `min-h-screen flex items-center justify-center p-4 transition-colors duration-1000 font-sans ${scene.bgColor}`;
 
-      // 1. 組合標題區 HTML
-      let headerHtml = `<div class="p-6 text-center">`;
-      if (scene.isCover) {
-        headerHtml += `<h2 class="text-xl md:text-2xl font-bold mb-2 ${scene.textColor} opacity-80">${scene.subtitle}</h2>`;
-      }
-      headerHtml += `<h1 class="text-3xl md:text-5xl font-bold tracking-wide ${scene.textColor} drop-shadow-md">${scene.title}</h1></div>`;
+      // 1. 組合標題區 HTML (已依照需求將最上方的標題與副標題文字移除)
+      let headerHtml = ``;
 
       // 2. 組合視覺圖片區 HTML
       let visualHtml = `<div class="relative w-full h-64 md:h-96 bg-black/20 flex items-center justify-center overflow-hidden" id="visual-area">`;
