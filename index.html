@@ -1,0 +1,285 @@
+import React, { useState, useEffect } from 'react';
+
+// 定義故事的所有場景與狀態
+const scenes = [
+  {
+    id: 0,
+    title: "大風吹，吹什麼？",
+    subtitle: "騎士廚師與餓肚子的龍",
+    content: "一個關於勇氣、理解與均衡飲食的療癒故事。準備好跟著小騎士一起出發了嗎？",
+    imageName: "cover.png",
+    emojiFallback: "📖🐉🍳",
+    bgColor: "bg-amber-100",
+    textColor: "text-amber-900",
+    isCover: true
+  },
+  {
+    id: 1,
+    title: "傳說的開端",
+    content: "很久很久以前，國王最心愛的寶貝公主不見了。大家都說，她被一隻可怕的惡龍抓到了遙遠的黑洞穴裡。",
+    imageName: "image_13.png",
+    emojiFallback: "👑🐉",
+    bgColor: "bg-slate-700",
+    textColor: "text-white"
+  },
+  {
+    id: 2,
+    title: "失敗的騎士們",
+    content: "許多騎士想去救公主。有的用尖銳的劍攻擊，惡龍更生氣地反擊。有的用甜點山引誘牠，惡龍吃得很開心，但吃完後卻更空虛，吼叫著要更多。",
+    imageName: "image_15.png",
+    emojiFallback: "🏰🗡️🍰",
+    bgColor: "bg-slate-800",
+    textColor: "text-white"
+  },
+  {
+    id: 3,
+    title: "惡龍的真相",
+    content: "最後沒有人敢靠近了。惡龍獨自坐在洞穴裡，身邊堆滿漂亮的糖果紙。牠的肚子明明很撐，心裡卻覺得好餓好孤單，身體也好難受。",
+    imageName: "image_16.png",
+    emojiFallback: "🐉🍬🥺",
+    bgColor: "bg-indigo-950",
+    textColor: "text-slate-300"
+  },
+  {
+    id: 4,
+    title: "逆行的小騎士",
+    content: "這時出現了一位小騎士。他沒有拿劍，頭上戴著媽媽廚房裡的湯鍋當頭盔，手裡緊緊握著一把木鍋鏟。他默默背對生氣的人群，獨自走進黑漆漆的洞口。",
+    imageName: "image_29.png",
+    emojiFallback: "🚶‍♂️🛡️🍳",
+    bgColor: "bg-indigo-900",
+    textColor: "text-slate-200"
+  },
+  {
+    id: 5,
+    title: "相遇與理解",
+    content: "洞穴裡滿是垃圾食物的包裝。小騎士沒有攻擊，他只是安靜地坐在惡龍面前，看著牠的眼睛，輕輕地問：「你還好嗎？」",
+    imageName: "image_5.png",
+    emojiFallback: "👀🥺",
+    bgColor: "bg-blue-900",
+    textColor: "text-blue-100"
+  },
+  {
+    id: 6,
+    title: "大風吹魔法：第一回合",
+    content: "小騎士舉起木鍋鏟：「大風吹，吹什麼？吹出彩虹能量！」",
+    interactive: true,
+    magicType: "rainbow",
+    magicItems: ["🐟", "🥦", "🍚"],
+    buttonText: "揮動木鍋鏟",
+    resultContent: "小騎士自己先吃了一大口，笑著說：「有青菜、有肉、有飯，吃完很滿足對吧？」惡龍好奇地、小心翼翼地咬了一小口。卡滋。雖然不甜，但肚子裡那個空空的洞，好像被填滿了一點點。",
+    imageName: "image_18.png",
+    emojiFallback: "✨🍲✨",
+    bgColor: "bg-green-800",
+    textColor: "text-green-50"
+  },
+  {
+    id: 7,
+    title: "痛苦求助",
+    content: "沒多久，惡龍又開始痛苦地哼哼。牠的肚子漲得像顆硬石頭，怎麼動都不舒服。牠淚眼汪汪地看著小騎士，好像在說：「幫幫我，好痛。」",
+    imageName: "image_9.png",
+    emojiFallback: "🐉😭🤰",
+    bgColor: "bg-red-900",
+    textColor: "text-red-100"
+  },
+  {
+    id: 8,
+    title: "大風吹魔法：第二回合",
+    content: "小騎士再次舉起木鍋鏟：「大風吹，吹什麼？吹把肚子變不痛的魔法！」",
+    interactive: true,
+    magicType: "water",
+    magicItems: ["🥝", "🥣", "💧"],
+    buttonText: "揮動木鍋鏟",
+    resultContent: "綠色清涼的風吹來奇異果、燕麥和大量的水！惡龍大口喝下，突然「噗」的一聲，便秘解除了！身體瞬間變得好輕鬆。",
+    imageName: "image_magic2.png",
+    emojiFallback: "💨🌊🥝",
+    bgColor: "bg-teal-800",
+    textColor: "text-teal-50"
+  },
+  {
+    id: 9,
+    title: "大風吹魔法：第三回合",
+    content: "惡龍的表情變得好柔和，小騎士決定給牠最後的驚喜：「大風吹，吹什麼？吹出大自然的甜寶石！」",
+    interactive: true,
+    magicType: "sweet",
+    magicItems: ["🍯", "🍎", "🥛"],
+    buttonText: "揮動木鍋鏟",
+    resultContent: "吹來了蜂蜜、新鮮水果和優格。惡龍開心享用，第一次體會到不是來自糖果，而是真正的快樂與滿足。",
+    imageName: "image_magic3.png",
+    emojiFallback: "🍯🍓😊",
+    bgColor: "bg-amber-700",
+    textColor: "text-amber-50"
+  },
+  {
+    id: 10,
+    title: "溫柔變身",
+    content: "奇妙的事情發生了！在健康的魔法光芒中，惡龍粗糙的鱗片像花瓣一樣慢慢剝落，巨大的身軀溶解在溫暖的光芒裡。",
+    imageName: "image_24.png",
+    emojiFallback: "✨🐉➡️👸✨",
+    bgColor: "bg-pink-800",
+    textColor: "text-pink-100"
+  },
+  {
+    id: 11,
+    title: "快樂結局",
+    content: "惡龍原來是被垃圾食物詛咒的公主！現在她變回金髮、美麗又健康的樣子。小騎士與公主同桌共享著美味均衡的一餐，從此過著健康快樂的日子！",
+    imageName: "image_26.png",
+    emojiFallback: "👸👦🥗🎉",
+    bgColor: "bg-orange-100",
+    textColor: "text-orange-900",
+    isEnd: true
+  }
+];
+
+export default function App() {
+  const [currentScene, setCurrentScene] = useState(0);
+  const [magicCasted, setMagicCasted] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const scene = scenes[currentScene];
+
+  // 當場景切換時，重置魔法狀態和圖片錯誤狀態
+  useEffect(() => {
+    setMagicCasted(false);
+    setImageError(false);
+  }, [currentScene]);
+
+  const handleNext = () => {
+    if (currentScene < scenes.length - 1) {
+      setCurrentScene(currentScene + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentScene > 0) {
+      setCurrentScene(currentScene - 1);
+    }
+  };
+
+  const castMagic = () => {
+    setIsAnimating(true);
+    // 模擬魔法動畫時間
+    setTimeout(() => {
+      setIsAnimating(false);
+      setMagicCasted(true);
+    }, 2000);
+  };
+
+  return (
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-1000 ${scene.bgColor} font-sans`}>
+      <div className="max-w-3xl w-full bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+        
+        {/* 標題區 */}
+        <div className="p-6 text-center">
+          {scene.isCover && (
+            <h2 className={`text-xl md:text-2xl font-bold mb-2 ${scene.textColor} opacity-80`}>
+              {scene.subtitle}
+            </h2>
+          )}
+          <h1 className={`text-3xl md:text-5xl font-bold tracking-wide ${scene.textColor} drop-shadow-md`}>
+            {scene.title}
+          </h1>
+        </div>
+
+        {/* 視覺呈現區 (圖片或魔法動畫) */}
+        <div className="relative w-full h-64 md:h-96 bg-black/20 flex items-center justify-center overflow-hidden">
+          
+          {/* 如果有實際圖片，請將圖片放在專案的 public 資料夾中 */}
+          {!imageError ? (
+            <img 
+              src={`./${scene.imageName}`} 
+              alt={scene.title}
+              className={`w-full h-full object-contain p-4 transition-opacity duration-500 ${isAnimating ? 'opacity-20' : 'opacity-100'}`}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className={`text-7xl md:text-9xl transition-all duration-500 ${isAnimating ? 'scale-90 opacity-20' : 'scale-100 opacity-100'}`}>
+              {scene.emojiFallback}
+            </div>
+          )}
+
+          {/* 魔法動畫覆蓋層 */}
+          {isAnimating && scene.interactive && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="flex gap-4 text-6xl md:text-8xl animate-bounce">
+                {scene.magicItems.map((item, index) => (
+                  <span key={index} className="drop-shadow-2xl animate-pulse" style={{ animationDelay: `${index * 0.2}s` }}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 故事文字與互動區 */}
+        <div className="p-6 md:p-10">
+          <p className={`text-xl md:text-2xl leading-relaxed mb-8 ${scene.textColor} ${scene.isCover ? 'text-center font-medium' : ''}`}>
+            {magicCasted ? scene.resultContent : scene.content}
+          </p>
+
+          {/* 封面專屬的開始按鈕 */}
+          {scene.isCover ? (
+            <div className="flex justify-center mt-4">
+              <button 
+                onClick={handleNext}
+                className="px-8 py-4 bg-amber-500 text-white rounded-full font-bold text-2xl shadow-lg hover:bg-amber-400 transition-all transform hover:scale-105 animate-bounce"
+              >
+                翻開故事書 📖
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* 魔法互動按鈕 */}
+              {scene.interactive && !magicCasted && (
+                <div className="flex justify-center mb-8">
+                  <button 
+                    onClick={castMagic}
+                    disabled={isAnimating}
+                    className="group relative px-8 py-4 bg-amber-500 hover:bg-amber-400 text-amber-950 font-bold rounded-full text-xl shadow-[0_0_20px_rgba(245,158,11,0.5)] transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="mr-2">🍳</span>
+                    {isAnimating ? "魔法施展中..." : scene.buttonText}
+                    <div className="absolute inset-0 h-full w-full rounded-full border-2 border-white opacity-0 group-hover:animate-ping"></div>
+                  </button>
+                </div>
+              )}
+
+              {/* 一般頁面的導航按鈕 */}
+              <div className="flex justify-between items-center mt-8 border-t border-white/20 pt-6">
+                <button 
+                  onClick={handlePrev}
+                  className="px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full font-medium transition-colors"
+                >
+                  上一頁
+                </button>
+                
+                <div className={`text-sm ${scene.textColor} opacity-60`}>
+                  {currentScene} / {scenes.length - 1}
+                </div>
+
+                {(!scene.interactive || magicCasted) && !scene.isEnd && (
+                  <button 
+                    onClick={handleNext}
+                    className="px-6 py-2 bg-white text-slate-900 rounded-full font-bold shadow-lg hover:bg-slate-100 transition-all transform hover:translate-x-1"
+                  >
+                    下一頁 ➡️
+                  </button>
+                )}
+
+                {scene.isEnd && (
+                  <button 
+                    onClick={() => setCurrentScene(0)}
+                    className="px-6 py-2 bg-green-500 text-white rounded-full font-bold shadow-lg hover:bg-green-400 transition-all"
+                  >
+                    回到封面 🔄
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
