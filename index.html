@@ -91,6 +91,7 @@
         buttonText: "揮動木鍋鏟",
         resultContent: "小騎士自己先吃了一大口，笑著說：「有青菜、有肉、有飯，吃完很滿足對吧？」惡龍好奇地、小心翼翼地咬了一小口。卡滋。雖然不甜，但肚子裡那個空空的洞，好像被填滿了一點點。",
         imageName: "image_18.png",
+        resultImageName: "image_18_after.png",
         emojiFallback: "✨🍲✨",
         bgColor: "bg-green-800",
         textColor: "text-green-50"
@@ -114,6 +115,7 @@
         buttonText: "揮動木鍋鏟",
         resultContent: "綠色清涼的風吹來奇異果、燕麥和大量的水！惡龍大口喝下，突然「噗」的一聲，便秘解除了！身體瞬間變得好輕鬆。",
         imageName: "image_magic2.png",
+        resultImageName: "image_magic2_after.png",
         emojiFallback: "💨🌊🥝",
         bgColor: "bg-teal-800",
         textColor: "text-teal-50"
@@ -128,6 +130,7 @@
         buttonText: "揮動木鍋鏟",
         resultContent: "吹來了蜂蜜、新鮮水果和優格。惡龍開心享用，第一次體會到不是來自糖果，而是真正的快樂與滿足。",
         imageName: "image_magic3.png",
+        resultImageName: "image_magic3_after.png",
         emojiFallback: "🍯🍓😊",
         bgColor: "bg-amber-700",
         textColor: "text-amber-50"
@@ -177,8 +180,11 @@
       // 2. 組合視覺圖片區 HTML
       let visualHtml = `<div class="relative w-full h-64 md:h-96 bg-black/20 flex items-center justify-center overflow-hidden" id="visual-area">`;
       
+      // 判斷魔法是否已經施放，來決定要顯示哪一張圖片
+      let currentImage = (magicCasted && scene.resultImageName) ? scene.resultImageName : scene.imageName;
+      
       // 圖片標籤，如果找不到圖片會觸發 onerror 執行 handleImageError() 替換成 Emoji
-      visualHtml += `<img id="scene-img" src="./${scene.imageName}" alt="${scene.title}" class="w-full h-full object-contain p-4 transition-opacity duration-500 ${isAnimating ? 'opacity-20' : 'opacity-100'}" onerror="handleImageError()">`;
+      visualHtml += `<img id="scene-img" src="./${currentImage}" alt="${scene.title}" class="w-full h-full object-contain p-4 transition-opacity duration-500 ${isAnimating ? 'opacity-20' : 'opacity-100'}" onerror="handleImageError()">`;
 
       // 如果正在施放魔法動畫，加上漂浮的食物 Emoji
       if (isAnimating && scene.interactive) {
