@@ -6,24 +6,24 @@
   <title>大風吹，吹什麼? 小騎士與餓龍</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* 原本的小動畫保留 */
+    /* 保留必要的基礎動畫 */
     .animate-bounce-slow { animation: bounce 2s infinite; }
-    .animate-pulse-fast { animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     @keyframes ping-slow {
       75%, 100% { transform: scale(1.5); opacity: 0; }
     }
     .animate-ping-custom { animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
 
-    /* 這次新增的旋風魔法動畫 */
-    @keyframes spin-grow-fade {
-      0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
-      20% { opacity: 1; }
-      80% { transform: scale(1.2) rotate(360deg); opacity: 1; }
-      100% { transform: scale(1.5) rotate(450deg); opacity: 0; }
+    /* 更新為輕微上下晃動的魔法動畫 */
+    @keyframes bob-fade {
+      0% { transform: translateY(15px); opacity: 0; }
+      20% { opacity: 1; transform: translateY(-5px); }
+      50% { transform: translateY(5px); opacity: 1; }
+      80% { opacity: 1; transform: translateY(-5px); }
+      100% { transform: translateY(15px); opacity: 0; }
     }
-    .magic-tornado {
-      animation: spin-grow-fade 2.5s ease-in-out forwards;
-      pointer-events: none; /* 讓旋風不會擋住底下的滑鼠點擊 */
+    .magic-effect {
+      animation: bob-fade 2.5s ease-in-out forwards;
+      pointer-events: none; /* 讓圖片不會擋住底下的滑鼠點擊 */
     }
   </style>
 </head>
@@ -185,24 +185,11 @@
       // 底層主圖片
       visualHtml += `<img id="scene-img" src="./${currentImage}" alt="${scene.title}" class="w-full h-full object-contain p-4 transition-opacity duration-1000 ${isAnimating ? 'opacity-50' : 'opacity-100'}" onerror="handleImageError()">`;
 
-      // 如果正在動畫中，蓋上旋風魔法圖層
+      // 如果正在動畫中，只蓋上你上傳的魔法圖層，不加 Emoji
       if (isAnimating && scene.interactive) {
         visualHtml += `
-          <div class="absolute inset-0 flex items-center justify-center z-10">
-            <img src="./magic_wind.png" class="w-full h-full object-contain magic-tornado" onerror="this.style.display='none'">
-          </div>
-        `;
-        
-        // 保留原本飄出的食物 Emoji 當點綴
-        let itemsHtml = scene.magicItems.map((item, index) =>
-          `<span class="drop-shadow-2xl animate-pulse-fast" style="animation-delay: ${index * 0.2}s">${item}</span>`
-        ).join('');
-        
-        visualHtml += `
-          <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-            <div class="flex gap-4 text-6xl md:text-8xl animate-bounce">
-              ${itemsHtml}
-            </div>
+          <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <img src="./magic_wind.png" class="w-full h-full object-contain magic-effect" onerror="this.style.display='none'">
           </div>
         `;
       }
@@ -271,20 +258,8 @@
       const scene = scenes[currentScene];
       const visualArea = document.getElementById('visual-area');
       
+      // 如果主圖檔遺失，還是保留文字版的 emoji 當作替換，以免畫面全空
       let fallbackHtml = `<div class="text-7xl md:text-9xl transition-all duration-500 ${isAnimating ? 'scale-90 opacity-20' : 'scale-100 opacity-100'}">${scene.emojiFallback}</div>`;
-
-      if (isAnimating && scene.interactive) {
-        let itemsHtml = scene.magicItems.map((item, index) =>
-          `<span class="drop-shadow-2xl animate-pulse-fast" style="animation-delay: ${index * 0.2}s">${item}</span>`
-        ).join('');
-        fallbackHtml += `
-          <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-            <div class="flex gap-4 text-6xl md:text-8xl animate-bounce">
-              ${itemsHtml}
-            </div>
-          </div>
-        `;
-      }
       
       visualArea.innerHTML = fallbackHtml;
     }
@@ -318,7 +293,6 @@
       isAnimating = true;
       render(); 
 
-      // 這次的動畫我拉長到 2.5 秒，讓旋風轉得更有感覺
       setTimeout(() => {
         isAnimating = false;
         magicCasted = true;
